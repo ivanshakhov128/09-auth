@@ -13,14 +13,12 @@ export const metadata: Metadata = {
 export default async function Profile() {
   const cookieStore = await cookies();
 
-  // ❗️ проверяем accessToken
   const accessToken = cookieStore.get("accessToken");
 
   if (!accessToken) {
     redirect("/sign-in");
   }
 
-  // 🔥 передаём ВСЕ cookies
   const cookieHeader = cookieStore.toString();
 
   let user;

@@ -25,7 +25,6 @@ export default function Header() {
             </Link>
           </li>
 
-          {/* тут AuthNavigation просто рендерит li */}
           <AuthNavigation />
         </ul>
       </nav>

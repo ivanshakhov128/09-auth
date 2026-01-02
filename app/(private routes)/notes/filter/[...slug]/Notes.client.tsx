@@ -49,7 +49,6 @@ export default function NotesClient({ tag }: NotesClientProps) {
           }}
         />
 
-        {/* ✅ вместо модалки — ссылка */}
         <Link href="/notes/action/create" className={css.button}>
           Create note +
         </Link>

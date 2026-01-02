@@ -18,7 +18,7 @@ export default function SignUpPage() {
     const password = formData.get("password") as string;
 
     try {
-      await register({ email, password }); // <-- передаем объект
+      await register({ email, password });
       router.push("/profile");
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {

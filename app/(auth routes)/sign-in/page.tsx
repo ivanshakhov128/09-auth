@@ -9,7 +9,7 @@ import { AxiosError } from "axios";
 
 export default function SignInPage() {
   const router = useRouter();
-  const setUser = useAuthStore((state) => state.setUser); // <- слушаем setUser
+  const setUser = useAuthStore((state) => state.setUser);
   const [error, setError] = useState<string>("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -20,8 +20,8 @@ export default function SignInPage() {
 
     try {
       const user = await login({ email, password });
-      setUser(user); // <- обновляем Zustand
-      router.push("/profile"); // <- редирект
+      setUser(user);
+      router.push("/profile");
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
         setError(err.response?.data?.message || "Login failed");

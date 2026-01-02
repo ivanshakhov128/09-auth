@@ -24,12 +24,11 @@ export default function AuthProvider({ children }: AuthProviderProps) {
         } else {
           clearIsAuthenticated();
 
-          // если пытаемся попасть на приватный маршрут
           if (
             pathname.startsWith("/profile") ||
             pathname.startsWith("/notes")
           ) {
-            router.replace("/sign-in"); // replace вместо push предотвращает "назад" на приватную страницу
+            router.replace("/sign-in");
           }
         }
       } catch {
@@ -42,7 +41,6 @@ export default function AuthProvider({ children }: AuthProviderProps) {
       }
     };
 
-    // проверка только если не авторизован
     if (!isAuthenticated) {
       verifySession();
     } else {
@@ -50,7 +48,6 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [pathname, isAuthenticated, setUser, clearIsAuthenticated, router]);
 
-  if (loading) return <p>Loading...</p>; // можно заменить на компонент спиннера
-
+  if (loading) return <p>Loading...</p>;
   return <>{children}</>;
 }

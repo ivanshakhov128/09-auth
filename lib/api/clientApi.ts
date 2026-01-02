@@ -1,11 +1,7 @@
-// lib/api/clientApi.ts
-import { api } from "./api"; // твой axios с baseURL и withCredentials
+import { api } from "./api";
 import type { Note } from "@/types/note";
 import type { User } from "@/types/user";
 
-// ==========================
-// Notes
-// ==========================
 export interface FetchNotesProps {
   search?: string;
   page: number;
@@ -54,9 +50,6 @@ export async function deleteNote(id: Note["id"]): Promise<Note> {
   return response.data;
 }
 
-// ==========================
-// Auth & User
-// ==========================
 export interface RegisterRequest {
   email: string;
   password: string;
@@ -90,14 +83,10 @@ export async function updateMe({ username }: UpdateMeProps): Promise<User> {
   return response.data;
 }
 
-interface CheckSessionResponse {
-  success: boolean;
-}
-
 export const checkSession = async (): Promise<User | null> => {
   try {
     const { data } = await api.get<User>("/auth/session");
-    return data || null; // null если нет сессии
+    return data || null;
   } catch {
     return null;
   }

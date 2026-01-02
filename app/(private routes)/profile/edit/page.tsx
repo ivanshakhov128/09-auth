@@ -17,13 +17,12 @@ export default function EditProfilePage() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Проверка сессии и получение пользователя при монтировании
   useEffect(() => {
     const verify = async () => {
       try {
-        const hasSession = await checkSession(); // boolean
+        const hasSession = await checkSession();
         if (hasSession) {
-          const me = await getMe(); // User
+          const me = await getMe();
           setUser(me);
           setUsername(me.username || "");
         } else {
