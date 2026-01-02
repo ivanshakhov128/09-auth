@@ -14,14 +14,14 @@ export default function AuthNavigation() {
     try {
       await logout();
       clearIsAuthenticated();
-      router.push("/sign-in"); // редірект на сторінку логіну
+      router.push("/sign-in");
     } catch (error) {
       console.error("Logout failed", error);
     }
   };
 
   return (
-    <ul className={css.navigation}>
+    <>
       {isAuthenticated ? (
         <>
           <li className={css.navigationItem}>
@@ -54,6 +54,6 @@ export default function AuthNavigation() {
           </li>
         </>
       )}
-    </ul>
+    </>
   );
 }

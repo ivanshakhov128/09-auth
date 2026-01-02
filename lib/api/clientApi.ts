@@ -7,8 +7,8 @@ export const register = async (data: {
   email: string;
   password: string;
 }): Promise<User> => {
-  const response = await api.post<User>("/auth/register", data);
-  return response.data;
+  const response = await api.post("/auth/register", data);
+  return response.data.user ?? response.data;
 };
 
 // логин
@@ -16,8 +16,8 @@ export const login = async (data: {
   email: string;
   password: string;
 }): Promise<User> => {
-  const response = await api.post<User>("/auth/login", data);
-  return response.data;
+  const response = await api.post("/auth/login", data);
+  return response.data.user ?? response.data;
 };
 
 // логаут
@@ -27,20 +27,20 @@ export const logout = async (): Promise<void> => {
 
 // проверка сессии
 export const checkSession = async (): Promise<User | null> => {
-  const response = await api.get<User>("/auth/session");
-  return response.data || null;
+  const response = await api.get("/auth/session");
+  return response.data.user ?? response.data ?? null;
 };
 
 // получение своего профиля
 export const getMe = async (): Promise<User> => {
-  const response = await api.get<User>("/users/me");
-  return response.data;
+  const response = await api.get("/users/me");
+  return response.data.user ?? response.data;
 };
 
-// обновление профиля
+// обновление профиля (убрали проверку id)
 export const updateMe = async (
   data: Partial<{ username: string; email: string; avatar: string }>
 ): Promise<User> => {
-  const response = await api.patch<User>("/users/me", data);
-  return response.data;
+  const response = await api.patch("/users/me", data);
+  return response.data.user ?? response.data;
 };

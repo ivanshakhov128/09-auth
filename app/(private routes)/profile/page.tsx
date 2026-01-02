@@ -1,6 +1,5 @@
-// app/(private routes)/profile/page.tsx
 import Image from "next/image";
-import css from "./Profile.module.css";
+import css from "@/components/Profile/Profile.module.css";
 import { Metadata } from "next";
 import { getMe } from "@/lib/api/serverApi";
 import { cookies } from "next/headers";
@@ -12,16 +11,22 @@ export const metadata: Metadata = {
 };
 
 export default async function Profile() {
-  // Берём куки из запроса
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
+
+  // ❗️ проверяем accessToken
+  const accessToken = cookieStore.get("accessToken");
+
+  if (!accessToken) {
+    redirect("/sign-in");
+  }
+
+  // 🔥 передаём ВСЕ cookies
   const cookieHeader = cookieStore.toString();
 
-  // Получаем пользователя с сервера
   let user;
   try {
     user = await getMe(cookieHeader);
   } catch {
-    // Если ошибка (не авторизован), редиректим на /sign-in
     redirect("/sign-in");
   }
 
@@ -34,6 +39,7 @@ export default async function Profile() {
             Edit Profile
           </a>
         </div>
+
         <div className={css.avatarWrapper}>
           <Image
             src={user.avatar}
@@ -43,6 +49,7 @@ export default async function Profile() {
             className={css.avatar}
           />
         </div>
+
         <div className={css.profileInfo}>
           <p>Username: {user.username}</p>
           <p>Email: {user.email}</p>
