@@ -43,15 +43,10 @@ export const getMe = async (sessionCookie: string): Promise<User> => {
   return data;
 };
 
-export const checkSession = async (
+export const checkServerSession = async (
   sessionCookie?: string
-): Promise<User | null> => {
-  if (!sessionCookie) return null;
+): Promise<import("axios").AxiosResponse<User>> => {
+  if (!sessionCookie) throw new Error("No session cookie");
 
-  try {
-    const { data } = await serverApi(sessionCookie).get("/auth/session");
-    return data || null;
-  } catch {
-    return null;
-  }
+  return serverApi(sessionCookie).get<User>("/auth/session");
 };
