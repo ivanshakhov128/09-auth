@@ -4,7 +4,7 @@ import {
   HydrationBoundary,
 } from "@tanstack/react-query";
 import NotesClient from "./Notes.client";
-import { fetchNotes } from "@/lib/api/api";
+import { fetchNotes } from "@/lib//api/clientApi";
 import type { Metadata } from "next";
 
 interface FilterProps {
