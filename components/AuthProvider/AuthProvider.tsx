@@ -2,7 +2,7 @@
 
 import { ReactNode, useEffect, useState } from "react";
 import { useAuthStore } from "@/lib/store/authStore";
-import { checkSession } from "@/lib/api/clientApi";
+import { checkSession, getMe } from "@/lib/api/clientApi";
 import { useRouter, usePathname } from "next/navigation";
 
 interface AuthProviderProps {
@@ -12,22 +12,45 @@ interface AuthProviderProps {
 export default function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { clearIsAuthenticated } = useAuthStore();
+  const { setUser, clearIsAuthenticated } = useAuthStore();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const verifySession = async () => {
       try {
-        const user = await checkSession();
+        // Перевірка сесії
+        const sessionValid = await checkSession();
 
-        if (!user) {
+        if (!sessionValid) {
           clearIsAuthenticated();
-
           if (
             pathname.startsWith("/profile") ||
             pathname.startsWith("/notes")
           ) {
             router.replace("/sign-in");
+          }
+        } else {
+          try {
+            const user = await getMe();
+            if (user) {
+              setUser(user);
+            } else {
+              clearIsAuthenticated();
+              if (
+                pathname.startsWith("/profile") ||
+                pathname.startsWith("/notes")
+              ) {
+                router.replace("/sign-in");
+              }
+            }
+          } catch {
+            clearIsAuthenticated();
+            if (
+              pathname.startsWith("/profile") ||
+              pathname.startsWith("/notes")
+            ) {
+              router.replace("/sign-in");
+            }
           }
         }
       } catch {
@@ -41,8 +64,9 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     };
 
     verifySession();
-  }, [pathname, clearIsAuthenticated, router]);
+  }, [pathname, router, setUser, clearIsAuthenticated]);
 
   if (loading) return <p>Loading...</p>;
+
   return <>{children}</>;
 }

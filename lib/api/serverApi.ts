@@ -1,20 +1,14 @@
-import { api } from "./api"; // готовий Axios екземпляр
+import { api } from "./api";
 import { cookies } from "next/headers";
 import type { User } from "@/types/user";
 import type { Note } from "@/types/note";
 import type { AxiosResponse } from "axios";
 
-/**
- * Повертає cookie header для серверних запитів (Next.js App Router)
- */
 async function getCookieHeader(): Promise<string> {
   const cookieStore = await cookies();
-  return cookieStore.toString(); // "accessToken=...; refreshToken=..."
+  return cookieStore.toString();
 }
 
-/**
- * Отримати всі нотатки (серверний варіант)
- */
 export async function fetchNotes(params?: {
   search?: string;
   page?: number;
@@ -33,9 +27,6 @@ export async function fetchNotes(params?: {
   return data;
 }
 
-/**
- * Отримати нотатку за ID
- */
 export async function fetchNoteById(id: Note["id"]): Promise<Note> {
   const cookieHeader = await getCookieHeader();
 
@@ -48,9 +39,6 @@ export async function fetchNoteById(id: Note["id"]): Promise<Note> {
   return data;
 }
 
-/**
- * Отримати поточного користувача
- */
 export async function getMe(): Promise<User> {
   const cookieHeader = await getCookieHeader();
 
@@ -63,10 +51,6 @@ export async function getMe(): Promise<User> {
   return data;
 }
 
-/**
- * Перевірка сесії (наприклад для middleware або proxy)
- * Повертає повний AxiosResponse для доступу до set-cookie
- */
 export async function checkServerSession(): Promise<AxiosResponse<User>> {
   const cookieHeader = await getCookieHeader();
 
