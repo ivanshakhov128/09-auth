@@ -12,18 +12,15 @@ export const metadata: Metadata = {
 
 export default async function Profile() {
   const cookieStore = await cookies();
-
-  const accessToken = cookieStore.get("accessToken");
+  const accessToken = cookieStore.get("accessToken")?.value;
 
   if (!accessToken) {
     redirect("/sign-in");
   }
 
-  const cookieHeader = cookieStore.toString();
-
   let user;
   try {
-    user = await getMe(cookieHeader);
+    user = await getMe();
   } catch {
     redirect("/sign-in");
   }

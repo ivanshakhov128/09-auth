@@ -1,3 +1,4 @@
+// app/middleware/proxy.ts
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { checkServerSession } from "@/lib/api/serverApi";
@@ -8,7 +9,11 @@ const publicRoutes = ["/sign-in", "/sign-up"];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // 🔑 await cookies() возвращает ReadonlyRequestCookies
   const cookieStore = await cookies();
+
+  // Используем get() уже на объекте cookieStore
   const accessToken = cookieStore.get("accessToken")?.value;
   const refreshToken = cookieStore.get("refreshToken")?.value;
 
@@ -19,19 +24,19 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith(route)
   );
 
-  // Якщо нема accessToken, але є refreshToken — перевіряємо сесію
   if (!accessToken && refreshToken) {
     try {
-      const res = await checkServerSession(refreshToken);
+      const res = await checkServerSession(); // serverApi берет куки сам
       const setCookie = res.headers["set-cookie"];
+
       if (setCookie) {
         const cookiesArray = Array.isArray(setCookie) ? setCookie : [setCookie];
         for (const cookieStr of cookiesArray) {
           const parsed = parse(cookieStr);
           const options = {
             expires: parsed.Expires ? new Date(parsed.Expires) : undefined,
-            path: parsed.Path,
-            maxAge: Number(parsed["Max-Age"]),
+            path: parsed.Path ?? "/",
+            maxAge: parsed["Max-Age"] ? Number(parsed["Max-Age"]) : undefined,
           };
           if (parsed.accessToken)
             cookieStore.set("accessToken", parsed.accessToken, options);
@@ -55,17 +60,14 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // Доступ для приватних маршрутів
   if (!accessToken && isPrivateRoute) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 
-  // Редірект на головну для авторизованих користувачів на публічних маршрутах
   if (accessToken && isPublicRoute) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // Дозвіл для приватних маршрутів
   if (accessToken && isPrivateRoute) {
     return NextResponse.next();
   }
@@ -73,7 +75,6 @@ export async function proxy(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Обов'язково конфігурація matcher
 export const config = {
   matcher: ["/profile/:path*", "/notes/:path*", "/sign-in", "/sign-up"],
 };

@@ -12,16 +12,15 @@ interface AuthProviderProps {
 export default function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { isAuthenticated, setUser, clearIsAuthenticated } = useAuthStore();
+  const { clearIsAuthenticated } = useAuthStore();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const verifySession = async () => {
       try {
         const user = await checkSession();
-        if (user) {
-          setUser(user);
-        } else {
+
+        if (!user) {
           clearIsAuthenticated();
 
           if (
@@ -41,12 +40,8 @@ export default function AuthProvider({ children }: AuthProviderProps) {
       }
     };
 
-    if (!isAuthenticated) {
-      verifySession();
-    } else {
-      setLoading(false);
-    }
-  }, [pathname, isAuthenticated, setUser, clearIsAuthenticated, router]);
+    verifySession();
+  }, [pathname, clearIsAuthenticated, router]);
 
   if (loading) return <p>Loading...</p>;
   return <>{children}</>;

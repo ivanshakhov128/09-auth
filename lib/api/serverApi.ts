@@ -1,52 +1,78 @@
-import axios from "axios";
-import type { User } from "../../types/user";
-import type { Note } from "../../types/note";
-
-const baseURL = process.env.NEXT_PUBLIC_API_URL + "/api";
+import { api } from "./api"; // готовий Axios екземпляр
+import { cookies } from "next/headers";
+import type { User } from "@/types/user";
+import type { Note } from "@/types/note";
+import type { AxiosResponse } from "axios";
 
 /**
- * Создаём серверный экземпляр axios с передачей куки для авторизации
- * @param sessionCookie - значение куки "notehub-session"
+ * Повертає cookie header для серверних запитів (Next.js App Router)
  */
-export const serverApi = (sessionCookie?: string) =>
-  axios.create({
-    baseURL,
-    headers: sessionCookie
-      ? { Cookie: `notehub-session=${sessionCookie}` }
-      : {},
-    withCredentials: true,
+async function getCookieHeader(): Promise<string> {
+  const cookieStore = await cookies();
+  return cookieStore.toString(); // "accessToken=...; refreshToken=..."
+}
+
+/**
+ * Отримати всі нотатки (серверний варіант)
+ */
+export async function fetchNotes(params?: {
+  search?: string;
+  page?: number;
+  perPage?: number;
+  tag?: string;
+}): Promise<{ notes: Note[]; totalPages: number }> {
+  const cookieHeader = await getCookieHeader();
+
+  const { data } = await api.get("/notes", {
+    params,
+    headers: {
+      Cookie: cookieHeader,
+    },
   });
 
-export const fetchNotes = async (
-  sessionCookie?: string,
-  params?: {
-    search?: string;
-    page?: number;
-    perPage?: number;
-    tag?: string;
-  }
-): Promise<Note[]> => {
-  const { data } = await serverApi(sessionCookie).get("/notes", { params });
   return data;
-};
+}
 
-export const fetchNoteById = async (
-  sessionCookie: string,
-  id: string
-): Promise<Note> => {
-  const { data } = await serverApi(sessionCookie).get(`/notes/${id}`);
+/**
+ * Отримати нотатку за ID
+ */
+export async function fetchNoteById(id: Note["id"]): Promise<Note> {
+  const cookieHeader = await getCookieHeader();
+
+  const { data } = await api.get(`/notes/${id}`, {
+    headers: {
+      Cookie: cookieHeader,
+    },
+  });
+
   return data;
-};
+}
 
-export const getMe = async (sessionCookie: string): Promise<User> => {
-  const { data } = await serverApi(sessionCookie).get("/users/me");
+/**
+ * Отримати поточного користувача
+ */
+export async function getMe(): Promise<User> {
+  const cookieHeader = await getCookieHeader();
+
+  const { data } = await api.get<User>("/users/me", {
+    headers: {
+      Cookie: cookieHeader,
+    },
+  });
+
   return data;
-};
+}
 
-export const checkServerSession = async (
-  sessionCookie?: string
-): Promise<import("axios").AxiosResponse<User>> => {
-  if (!sessionCookie) throw new Error("No session cookie");
+/**
+ * Перевірка сесії (наприклад для middleware або proxy)
+ * Повертає повний AxiosResponse для доступу до set-cookie
+ */
+export async function checkServerSession(): Promise<AxiosResponse<User>> {
+  const cookieHeader = await getCookieHeader();
 
-  return serverApi(sessionCookie).get<User>("/auth/session");
-};
+  return api.get<User>("/auth/session", {
+    headers: {
+      Cookie: cookieHeader,
+    },
+  });
+}
