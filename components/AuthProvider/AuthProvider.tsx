@@ -18,10 +18,11 @@ export default function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     const verifySession = async () => {
       try {
-        // Перевірка сесії
+        // 1️⃣ Перевірка сесії
         const sessionValid = await checkSession();
 
         if (!sessionValid) {
+          // Якщо сесія невалідна — очистити стан і редірект
           clearIsAuthenticated();
           if (
             pathname.startsWith("/profile") ||
@@ -30,10 +31,11 @@ export default function AuthProvider({ children }: AuthProviderProps) {
             router.replace("/sign-in");
           }
         } else {
+          // 2️⃣ Якщо сесія валідна — отримати дані користувача
           try {
             const user = await getMe();
             if (user) {
-              setUser(user);
+              setUser(user); // записуємо користувача у глобальний стан
             } else {
               clearIsAuthenticated();
               if (
@@ -44,6 +46,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
               }
             }
           } catch {
+            // Якщо не вдалось отримати користувача
             clearIsAuthenticated();
             if (
               pathname.startsWith("/profile") ||
@@ -54,6 +57,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
           }
         }
       } catch {
+        // Будь-яка інша помилка — очистити стан
         clearIsAuthenticated();
         if (pathname.startsWith("/profile") || pathname.startsWith("/notes")) {
           router.replace("/sign-in");
