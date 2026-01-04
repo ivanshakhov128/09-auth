@@ -5,20 +5,28 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import css from "@/components/SignUp/SignUp.module.css";
 import { register } from "@/lib/api/clientApi";
+import { useAuthStore } from "@/lib/store/authStore";
 
 export default function SignUpPage() {
   const router = useRouter();
   const [error, setError] = useState("");
+  const setUser = useAuthStore((state) => state.setUser);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const form = e.currentTarget;
-    const formData = new FormData(form);
+
+    const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
     try {
-      await register({ email, password });
+      // 1️⃣ Регистрируем пользователя
+      const user = await register({ email, password });
+
+      // 2️⃣ Сохраняем пользователя в глобальный auth store
+      setUser(user);
+
+      // 3️⃣ Редиректим в профиль
       router.push("/profile");
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
@@ -32,6 +40,7 @@ export default function SignUpPage() {
   return (
     <main className={css.mainContent}>
       <h1 className={css.formTitle}>Sign up</h1>
+
       <form className={css.form} onSubmit={handleSubmit}>
         <div className={css.formGroup}>
           <label htmlFor="email">Email</label>
